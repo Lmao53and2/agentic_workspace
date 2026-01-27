@@ -1,0 +1,10 @@
+agno      # The core AI Agent framework
+pywebview       # The GUI window engine
+openai         # Required by Agno as a base (even if using Perplexity)
+pydantic       # Data validation used heavily by Agno
+python-dotenv   # Loads your API keys from .env
+requests       # Handles web requests for the API
+pyinstaller
+sqlalchemy
+pypdf
+lancedb
