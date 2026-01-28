@@ -16,8 +16,9 @@ class ApiBridge:
             "openrouter": os.environ.get("OPENROUTER_API_KEY"),
             "perplexity": os.environ.get("PERPLEXITY_API_KEY")
         }
-        # Default provider
+        # Default provider and model
         self.current_provider = os.environ.get("DEFAULT_PROVIDER", "perplexity")
+        self.current_model = os.environ.get("DEFAULT_MODEL", None)
         self.window = None
         self.rag_service = RagService()
         self.multi_agent_mode = False
@@ -38,6 +39,10 @@ class ApiBridge:
             return f"Provider switched to {provider}"
         return "Invalid provider"
 
+    def set_model(self, model_id):
+        self.current_model = model_id if model_id else None
+        return f"Model set to {model_id if model_id else 'default'}"
+
     def toggle_multi_agent(self, enabled):
         self.multi_agent_mode = enabled
         return f"Multi-Agent mode: {'Enabled' if enabled else 'Disabled'}"
@@ -51,16 +56,12 @@ class ApiBridge:
         return "RAG context cleared"
 
     def upload_files(self, files_json):
-        """
-        Expects a list of {"name": str, "content": str (base64)}
-        """
         try:
             files_data = json.loads(files_json) if isinstance(files_json, str) else files_json
             processed_files = []
             for f in files_data:
                 name = f["name"]
                 content_b64 = f["content"]
-                # Decode base64
                 if "," in content_b64:
                     content_b64 = content_b64.split(",")[1]
                 data = base64.b64decode(content_b64)
@@ -97,8 +98,9 @@ class ApiBridge:
         try:
             provider = self.current_provider
             api_key = self.keys.get(provider)
+            model_id = self.current_model
             
-            agent = get_agent(provider=provider, api_key=api_key, user_id="default_user")
+            agent = get_agent(provider=provider, api_key=api_key, model_id=model_id, user_id="default_user")
             full_response = ""
             run_response = agent.run(user_text, stream=True)
             
@@ -125,7 +127,6 @@ class ApiBridge:
             if target_id:
                 self.window.evaluate_js(f"clearBubble('{target_id}')")
             else:
-                # Create a temporary ID if none provided to show progress
                 target_id = 'multi-' + str(threading.get_ident())
                 self.window.evaluate_js(f"createBotBubble('{target_id}')")
 
@@ -133,10 +134,8 @@ class ApiBridge:
             for step in orchestrator.run_cycle(user_text):
                 role = step["role"]
                 content = step["content"]
-                
                 formatted_step = f"\n\n**[{role}]**\n{content}"
                 full_history_text += formatted_step
-                
                 self.window.evaluate_js(f"receiveChunk({json.dumps(formatted_step)}, '{target_id}')")
             
             save_msg("bot", full_history_text)
