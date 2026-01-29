@@ -8,10 +8,10 @@ from agno.models.xai import xAI
 from agno.db.sqlite import SqliteDb
 from agno.knowledge.knowledge import Knowledge
 from agno.vectordb.lancedb import LanceDb
-from agno.document.reader.pdf_reader import PDFReader
-from agno.document.reader.csv_reader import CSVReader
-from agno.document.reader.text_reader import TextReader
-from agno.document.chunking.recursive_character import RecursiveCharacterChunker
+from agno.knowledge.reader.pdf_reader import PDFReader
+from agno.knowledge.reader.csv_reader import CSVReader
+from agno.knowledge.reader.text_reader import TextReader
+from agno.knowledge.chunking.recursive import RecursiveChunking
 
 import os
 import tempfile
@@ -31,7 +31,7 @@ knowledge = Knowledge(
         table_name="user_documents",
         uri=LANCE_URI,
     ),
-    chunker=RecursiveCharacterChunker(chunk_size=1000, chunk_overlap=200),
+    chunker=RecursiveChunking(chunk_size=1000, overlap=200),
 )
 
 # Use a FIXED user_id for single-user environment
