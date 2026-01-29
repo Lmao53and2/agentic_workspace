@@ -1,8 +1,10 @@
 from agno.agent import Agent
-from agno.models.perplexity import Perplexity
 from agno.models.openai import OpenAIChat
+from agno.models.anthropic import Claude
+from agno.models.google import Gemini
 from agno.models.groq import Groq
 from agno.models.openrouter import OpenRouter
+from agno.models.xai import xAI
 from agno.db.sqlite import SqliteDb
 from agno.knowledge.knowledge import Knowledge
 from agno.vectordb.lancedb import LanceDb
@@ -215,34 +217,64 @@ def get_knowledge_stats() -> Dict:
 # MODEL & AGENT CONFIGURATION
 # ============================================================================
 
-def get_model(provider, api_key, model_id=None):
-    """Factory function to return the correct Agno model instance."""
+# Default models for each provider
+DEFAULT_MODELS = {
+    "openai": "gpt-4o",
+    "anthropic": "claude-sonnet-4-5-20250929",
+    "gemini": "gemini-2.0-flash-001",
+    "groq": "llama-3.3-70b-versatile",
+    "grok": "grok-3",
+    "openrouter": "openai/gpt-4o-mini",
+}
+
+
+def get_model(provider: str, api_key: str, model_id: Optional[str] = None):
+    """
+    Factory function to return the correct Agno model instance.
+    
+    Args:
+        provider: Provider name (openai, anthropic, gemini, groq, grok, openrouter)
+        api_key: API key for the provider
+        model_id: Optional specific model ID (uses default if not provided)
+    
+    Returns:
+        Agno model instance
+    """
+    # Use default model if none specified
+    if not model_id:
+        model_id = DEFAULT_MODELS.get(provider)
+    
     if provider == "openai":
-        return OpenAIChat(id=model_id or "gpt-4o", api_key=api_key)
+        return OpenAIChat(id=model_id, api_key=api_key)
+    elif provider == "anthropic":
+        return Claude(id=model_id, api_key=api_key)
+    elif provider == "gemini":
+        return Gemini(id=model_id, api_key=api_key)
     elif provider == "groq":
-        return Groq(id=model_id or "llama-3.3-70b-versatile", api_key=api_key)
+        return Groq(id=model_id, api_key=api_key)
+    elif provider == "grok":
+        return xAI(id=model_id, api_key=api_key)
     elif provider == "openrouter":
-        return OpenRouter(id=model_id or "openai/gpt-4o-mini", api_key=api_key)
-    elif provider == "perplexity":
-        return Perplexity(id=model_id or "sonar-pro", api_key=api_key)
+        return OpenRouter(id=model_id, api_key=api_key)
     else:
-        # Default fallback
-        return Perplexity(id="sonar-pro", api_key=api_key)
+        # Fallback to OpenAI
+        print(f"Warning: Unknown provider '{provider}', falling back to OpenAI")
+        return OpenAIChat(id=model_id or "gpt-4o", api_key=api_key)
 
 
 def get_agent(
-    provider="perplexity", 
-    api_key=None, 
-    model_id=None, 
-    user_id=USER_ID,
-    enable_rag=True
+    provider: str = "openai", 
+    api_key: Optional[str] = None, 
+    model_id: Optional[str] = None, 
+    user_id: str = USER_ID,
+    enable_rag: bool = True
 ):
     """
     Returns a configured Agno Agent with the specified provider and key.
     RAG is enabled by default using LOCAL & FREE LanceDB vector store.
     
     Args:
-        provider: Model provider (perplexity, openai, groq, openrouter)
+        provider: Model provider (openai, anthropic, gemini, groq, grok, openrouter)
         api_key: API key for the provider
         model_id: Specific model ID to use
         user_id: User identifier
@@ -269,9 +301,3 @@ def get_agent(
         agent_config["search_knowledge"] = True
     
     return Agent(**agent_config)
-
-
-# Legacy support for original function signature
-def get_perplexity_agent(api_key, user_id=USER_ID):
-    """Legacy function for backward compatibility."""
-    return get_agent(provider="perplexity", api_key=api_key, user_id=user_id)
