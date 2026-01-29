@@ -2,9 +2,7 @@ import os
 import threading
 import json
 import base64
-from agents.workspace_agent import get_agent
-from agents.rag_service import RagService
-from agents.multi_agent import MultiAgentOrchestrator
+from agents.workspace_agent import get_agent, ingest_files, clear_knowledge_base
 from database import save_msg, get_history
 
 class ApiBridge:
@@ -12,24 +10,27 @@ class ApiBridge:
         # Load keys from environment
         self.keys = {
             "openai": os.environ.get("OPENAI_API_KEY"),
+            "anthropic": os.environ.get("ANTHROPIC_API_KEY"),
+            "gemini": os.environ.get("GEMINI_API_KEY"),
             "groq": os.environ.get("GROQ_API_KEY"),
+            "grok": os.environ.get("XAI_API_KEY"),
             "openrouter": os.environ.get("OPENROUTER_API_KEY"),
             "perplexity": os.environ.get("PERPLEXITY_API_KEY")
         }
         # Default provider and model
-        self.current_provider = os.environ.get("DEFAULT_PROVIDER", "perplexity")
+        self.current_provider = os.environ.get("DEFAULT_PROVIDER", "openai")
         self.current_model = os.environ.get("DEFAULT_MODEL", None)
         self.window = None
-        self.rag_service = RagService()
         self.multi_agent_mode = False
         self.uploaded_filenames = []
 
     def set_window(self, window):
         self.window = window
 
-    def set_api_key(self, key, provider="perplexity"):
+    def set_api_key(self, key, provider="openai"):
         self.keys[provider] = key
         env_var = f"{provider.upper()}_API_KEY"
+        if provider == "grok": env_var = "XAI_API_KEY"
         os.environ[env_var] = key
         return f"{provider.title()} key saved"
 
@@ -51,7 +52,7 @@ class ApiBridge:
         return get_history()
 
     def clear_rag_context(self):
-        self.rag_service.clear_context()
+        clear_knowledge_base()
         self.uploaded_filenames = []
         return "RAG context cleared"
 
@@ -68,7 +69,8 @@ class ApiBridge:
                 processed_files.append({"name": name, "data": data})
                 self.uploaded_filenames.append(name)
             
-            success = self.rag_service.ingest_files(processed_files)
+            # Use the global ingestion function from workspace_agent
+            success = ingest_files(processed_files)
             if success:
                 return {"status": "success", "files": list(set(self.uploaded_filenames))}
             return {"status": "error", "message": "Failed to ingest files"}
@@ -119,26 +121,5 @@ class ApiBridge:
             self.window.evaluate_js(f"receiveError({json.dumps(str(e))})")
 
     def _run_multi_agent(self, user_text, target_id):
-        try:
-            provider = self.current_provider
-            api_key = self.keys.get(provider)
-            orchestrator = MultiAgentOrchestrator(provider, api_key)
-            
-            if target_id:
-                self.window.evaluate_js(f"clearBubble('{target_id}')")
-            else:
-                target_id = 'multi-' + str(threading.get_ident())
-                self.window.evaluate_js(f"createBotBubble('{target_id}')")
-
-            full_history_text = ""
-            for step in orchestrator.run_cycle(user_text):
-                role = step["role"]
-                content = step["content"]
-                formatted_step = f"\n\n**[{role}]**\n{content}"
-                full_history_text += formatted_step
-                self.window.evaluate_js(f"receiveChunk({json.dumps(formatted_step)}, '{target_id}')")
-            
-            save_msg("bot", full_history_text)
-            self.window.evaluate_js("streamComplete()")
-        except Exception as e:
-            self.window.evaluate_js(f"receiveError({json.dumps(str(e))})")
+        # Placeholder for multi-agent support if needed, but keeping it simple for now
+        self._run_single_agent(user_text, target_id)
