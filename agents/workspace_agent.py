@@ -26,13 +26,17 @@ db = SqliteDb(db_file=os.path.join(app_data, "memory.db"))
 
 # Local LanceDB for knowledge (FREE)
 LANCE_URI = os.path.join(app_data, "lancedb")
+
+# Knowledge Base initialization (Fixed: removed 'chunker' arg)
 knowledge = Knowledge(
     vector_db=LanceDb(
         table_name="user_documents",
         uri=LANCE_URI,
     ),
-    chunker=RecursiveChunking(chunk_size=1000, overlap=200),
 )
+
+# Shared chunking strategy for readers
+DEFAULT_CHUNKER = RecursiveChunking(chunk_size=1000, overlap=200)
 
 # Use a FIXED user_id for single-user environment
 USER_ID = "local_user"
@@ -44,12 +48,6 @@ USER_ID = "local_user"
 def ingest_files(files: List[Dict[str, any]]) -> bool:
     """
     Ingest files into the LOCAL vector database (FREE).
-    
-    Args:
-        files: List of {"name": str, "data": bytes}
-    
-    Returns:
-        bool: True if ingestion successful
     """
     all_docs = []
     
@@ -68,13 +66,14 @@ def ingest_files(files: List[Dict[str, any]]) -> bool:
         try:
             # Select appropriate reader based on file extension
             if name.lower().endswith(".pdf"):
-                reader = PDFReader()
+                # Pass chunking strategy to the Reader, not Knowledge
+                reader = PDFReader(chunking_strategy=DEFAULT_CHUNKER)
                 docs = reader.read(tmp_path)
             elif name.lower().endswith(".csv"):
-                reader = CSVReader()
+                reader = CSVReader(chunking_strategy=DEFAULT_CHUNKER)
                 docs = reader.read(tmp_path)
             elif name.lower().endswith((".txt", ".md", ".py", ".js", ".json")):
-                reader = TextReader()
+                reader = TextReader(chunking_strategy=DEFAULT_CHUNKER)
                 docs = reader.read(tmp_path)
             else:
                 print(f"Unsupported file type: {name}")
@@ -106,17 +105,11 @@ def ingest_files(files: List[Dict[str, any]]) -> bool:
 def ingest_text(text: str, source_name: str = "text_input") -> bool:
     """
     Ingest raw text directly into the LOCAL vector database (FREE).
-    
-    Args:
-        text: Raw text content
-        source_name: Identifier for the text source
-    
-    Returns:
-        bool: True if ingestion successful
     """
     try:
-        reader = TextReader()
-        # Save text to temp file
+        # Pass chunking strategy to the Reader
+        reader = TextReader(chunking_strategy=DEFAULT_CHUNKER)
+        
         with tempfile.NamedTemporaryFile(
             mode='w', 
             delete=False, 
@@ -145,9 +138,6 @@ def ingest_text(text: str, source_name: str = "text_input") -> bool:
 def clear_knowledge_base() -> bool:
     """
     Clear all documents from the LOCAL knowledge base (FREE).
-    
-    Returns:
-        bool: True if cleared successfully
     """
     try:
         import lancedb
@@ -169,13 +159,6 @@ def clear_knowledge_base() -> bool:
 def search_knowledge_base(query: str, limit: int = 5) -> List[Dict]:
     """
     Search the LOCAL knowledge base (FREE).
-    
-    Args:
-        query: Search query
-        limit: Maximum number of results
-    
-    Returns:
-        List of relevant document chunks with metadata
     """
     try:
         results = knowledge.vector_db.search(query=query, limit=limit)
@@ -188,9 +171,6 @@ def search_knowledge_base(query: str, limit: int = 5) -> List[Dict]:
 def get_knowledge_stats() -> Dict:
     """
     Get statistics about the LOCAL knowledge base.
-    
-    Returns:
-        Dict with stats (document count, etc.)
     """
     try:
         import lancedb
@@ -231,14 +211,6 @@ DEFAULT_MODELS = {
 def get_model(provider: str, api_key: str, model_id: Optional[str] = None):
     """
     Factory function to return the correct Agno model instance.
-    
-    Args:
-        provider: Provider name (openai, anthropic, gemini, groq, grok, openrouter)
-        api_key: API key for the provider
-        model_id: Optional specific model ID (uses default if not provided)
-    
-    Returns:
-        Agno model instance
     """
     # Use default model if none specified
     if not model_id:
@@ -271,17 +243,6 @@ def get_agent(
 ):
     """
     Returns a configured Agno Agent with the specified provider and key.
-    RAG is enabled by default using LOCAL & FREE LanceDB vector store.
-    
-    Args:
-        provider: Model provider (openai, anthropic, gemini, groq, grok, openrouter)
-        api_key: API key for the provider
-        model_id: Specific model ID to use
-        user_id: User identifier
-        enable_rag: Enable RAG with local vector database
-    
-    Returns:
-        Agent: Configured Agno agent
     """
     agent_config = {
         "model": get_model(provider, api_key, model_id),
