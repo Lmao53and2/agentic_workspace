@@ -2,6 +2,8 @@ agno
 pywebview
 openai
 groq
+anthropic
+google-generativeai
 pydantic
 python-dotenv
 requests
@@ -9,3 +11,4 @@ pyinstaller
 sqlalchemy
 pypdf
 lancedb
+tantivy
