@@ -9,8 +9,7 @@
             --primary: #2d3436; 
             --accent: #0011ca; 
             --bg: #f8f9fa; 
-            --bot-bubble: #ffffff;
-            --user-bubble: #0984e3;
+            --bot-bubble: #ffffff;\n            --user-bubble: #0984e3;
             --sidebar-bg: #1e1e2e;
         }
 
@@ -167,72 +166,71 @@
 </head>
 <body>
 
-    <div id="sidebar">
-        <div class="sidebar-header">
-            <h3 style="margin:0">Settings</h3>
-            <span onclick="toggleSidebar()" style="cursor:pointer">×</span>
+    <div id=\"sidebar\">
+        <div class=\"sidebar-header\">
+            <h3 style=\"margin:0\">Settings</h3>
+            <span onclick=\"toggleSidebar()\" style=\"cursor:pointer\">×</span>
         </div>
         
-        <div class="config-section">
-            <label class="config-label">Provider</label>
-            <select id="provider-select" class="config-input" onchange="updateProvider()">
-                <option value="openai">OpenAI</option>
-                <option value="anthropic">Anthropic</option>
-                <option value="gemini">Gemini</option>
-                <option value="grok">Grok (xAI)</option>
-                <option value="groq">Groq</option>
-                <option value="openrouter">OpenRouter</option>
-                <option value="perplexity">Perplexity</option>
+        <div class=\"config-section\">
+            <label class=\"config-label\">Provider</label>\n            <select id=\"provider-select\" class=\"config-input\" onchange=\"updateProvider()\">
+                <option value=\"openai\">OpenAI</option>
+                <option value=\"anthropic\">Anthropic</option>
+                <option value=\"gemini\">Gemini</option>
+                <option value=\"grok\">Grok (xAI)</option>
+                <option value=\"groq\">Groq</option>
+                <option value=\"openrouter\">OpenRouter</option>
+                <option value=\"perplexity\">Perplexity</option>
             </select>
 
-            <label class="config-label">Model ID (Optional)</label>
-            <input type="text" id="model-input" class="config-input" placeholder="e.g. gpt-4o" onchange="updateModel()">
+            <label class=\"config-label\">Model ID (Optional)</label>
+            <input type=\"text\" id=\"model-input\" class=\"config-input\" placeholder=\"e.g. gpt-4o\" onchange=\"updateModel()\">
 
-            <label class="config-label">API Key</label>
-            <input type="password" id="api-key" class="config-input" placeholder="sk-...">
+            <label class=\"config-label\">API Key</label>
+            <input type=\"password\" id=\"api-key\" class=\"config-input\" placeholder=\"sk-...\">
             
-            <button class="btn-save" onclick="saveKey()">Save Configuration</button>
+            <button class=\"btn-save\" onclick=\"saveKey()\">Save Configuration</button>
         </div>
 
-        <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
+        <hr style=\"border: 0; border-top: 1px solid #444; margin: 20px 0;\">
 
-        <h4 style="margin:0 0 10px 0; font-size:14px">Knowledge Base</h4>
-        <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <h4 style=\"margin:0 0 10px 0; font-size:14px\">Knowledge Base</h4>
+        <div id=\"drop-zone\" onclick=\"document.getElementById('file-input').click()\">
             Drag PDF/CSV here<br>or Click to upload
         </div>
-        <input type="file" id="file-input" multiple style="display:none" onchange="handleFileSelect(event)">
-        <div id="sidebar-file-list" style="margin-top:10px"></div>
+        <input type=\"file\" id=\"file-input\" multiple style=\"display:none\" onchange=\"handleFileSelect(event)\">
+        <div id=\"sidebar-file-list\" style=\"margin-top:10px\"></div>
         
-        <button onclick="clearRag()" style="width:100%; margin-top:15px; background:#c0392b; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer; font-size:12px">Clear Context</button>
+        <button onclick=\"clearRag()\" style=\"width:100%; margin-top:15px; background:#c0392b; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer; font-size:12px\">Clear Context</button>
     </div>
 
-    <div class="sidebar-toggle-tab" onclick="toggleSidebar()" id="key-tab">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+    <div class=\"sidebar-toggle-tab\" onclick=\"toggleSidebar()\" id=\"key-tab\">
+        <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">
+            <path d=\"M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4\"></path>
         </svg>
     </div>
 
-    <div id="main-content">
-        <div class="header">
-            <div class="logo">Agentic Workspace</div>
-            <div style="font-size: 11px; color: #666;">
-                Multi-Agent: <input type="checkbox" id="agent-toggle" onchange="toggleAgents()">
+    <div id=\"main-content\">
+        <div class=\"header\">
+            <div class=\"logo\">Agentic Workspace</div>
+            <div style=\"font-size: 11px; color: #666;\">
+                Multi-Agent: <input type=\"checkbox\" id=\"agent-toggle\" onchange=\"toggleAgents()\">
             </div>
         </div>
 
-        <div id="chat-history"></div>
+        <div id=\"chat-history\"></div>
 
-        <div class="input-container">
-            <div id="file-list"></div>
-            <div class="input-box">
-                <input type="text" id="user-input" placeholder="Ask your agent..." onkeypress="handleEnter(event)">
-                <button class="send-btn" onclick="sendPrompt()">↑</button>
+        <div class=\"input-container\">
+            <div id=\"file-list\"></div>
+            <div class=\"input-box\">
+                <input type=\"text\" id=\"user-input\" placeholder=\"Ask your agent...\" onkeypress=\"handleEnter(event)\">
+                <button class=\"send-btn\" onclick=\"sendPrompt()\">↑</button>
             </div>
         </div>
     </div>
 
-    <script src="anime.min.js"></script>
-    <script src="marked.min.js"></script>
+    <script src=\"anime.min.js\"></script>
+    <script src=\"marked.min.js\"></script>
     
     <script>
         let currentBotMsgId = null;
@@ -266,7 +264,7 @@
         async function saveKey() {
             const k = document.getElementById('api-key').value;
             const p = document.getElementById('provider-select').value;
-            if(!k) { alert("Please enter a key"); return; }
+            if(!k) { alert(\"Please enter a key\"); return; }
             const res = await window.pywebview.api.set_api_key(k, p);
             alert(res);
         }
@@ -304,15 +302,15 @@
                 uploadData.push(await promise);
             }
             if (uploadData.length > 0) {
-                dz.innerText = "Ingesting...";
+                dz.innerText = \"Ingesting...\";
                 const res = await window.pywebview.api.upload_files(uploadData);
                 if (res.status === 'success') {
                     updateFileList(res.files);
-                    dz.innerText = "Files ready!";
-                    setTimeout(() => { dz.innerText = "Drag PDF/CSV here\nor Click to upload"; }, 3000);
+                    dz.innerText = \"Files ready!\";
+                    setTimeout(() => { dz.innerText = \"Drag PDF/CSV here\\nor Click to upload\"; }, 3000);
                 } else {
-                    alert("Error: " + res.message);
-                    dz.innerText = "Drag PDF/CSV here\nor Click to upload";
+                    alert(\"Error: \" + res.message);
+                    dz.innerText = \"Drag PDF/CSV here\\nor Click to upload\";
                 }
             }
         }
@@ -320,9 +318,8 @@
         function updateFileList(files) {
             const list = document.getElementById('file-list');
             const sidebarList = document.getElementById('sidebar-file-list');
-            const html = files.map(f => `<div class="file-tag">${f}</div>`).join('');
-            list.innerHTML = html;
-            sidebarList.innerHTML = html;
+            const html = files.map(f => `<div class=\"file-tag\">${f}</div>`).join('');
+            list.innerHTML = html;\n            sidebarList.innerHTML = html;
         }
 
         function handleEnter(e) { if(e.key === 'Enter') sendPrompt(); }
@@ -335,16 +332,15 @@
             appendMessage('user', val);
             const botId = 'bot-' + Date.now();
             currentBotMsgId = botId;
-            botBuffers[botId] = "";
+            botBuffers[botId] = \"\";
             createBotBubble(botId);
             window.pywebview.api.start_chat_stream(val);
         }
 
         function receiveChunk(chunk, targetId) {
-            const id = targetId || currentBotMsgId;
-            const div = document.getElementById(id);
+            const id = targetId || currentBotMsgId;\n            const div = document.getElementById(id);
             if(div) {
-                botBuffers[id] = (botBuffers[id] || "") + chunk;
+                botBuffers[id] = (botBuffers[id] || \"\") + chunk;
                 div.innerHTML = marked.parse(botBuffers[id]);
                 scrollToBottom();
             }
@@ -353,10 +349,18 @@
         function createBotBubble(id) {
             const container = document.getElementById('chat-history');
             const wrapper = document.createElement('div');
-            wrapper.className = "message-wrapper bot-wrapper";
-            wrapper.innerHTML = `<div class="message bot" id="${id}">...</div>`;
+            wrapper.className = \"message-wrapper bot-wrapper\";
+            wrapper.innerHTML = `<div class=\"message bot\" id=\"${id}\">...</div>`;
             container.appendChild(wrapper);
             scrollToBottom();
+        }
+
+        function clearBubble(id) {
+            const div = document.getElementById(id);
+            if(div) {
+                div.innerHTML = \"\";
+                botBuffers[id] = \"\"; // Important: Reset the buffer so new text doesn't append to old text
+            }
         }
 
         function appendMessage(role, text, animate=true) {
@@ -368,15 +372,15 @@
             } else {
                 const container = document.getElementById('chat-history');
                 const wrapper = document.createElement('div');
-                wrapper.className = "message-wrapper user-wrapper";
-                wrapper.innerHTML = `<div class="message user">${text.replace(/</g, "&lt;")}</div>`;
+                wrapper.className = \"message-wrapper user-wrapper\";
+                wrapper.innerHTML = `<div class=\"message user\">${text.replace(/</g, \"&lt;\")}</div>`;
                 container.appendChild(wrapper);
             }
             scrollToBottom();
         }
 
         function scrollToBottom() { document.getElementById('chat-history').scrollTop = document.getElementById('chat-history').scrollHeight; }
-        function receiveError(e) { alert("Error: " + e); }
+        function receiveError(e) { alert(\"Error: \" + e); }
         function streamComplete() { currentBotMsgId = null; }
     </script>
 </body>
