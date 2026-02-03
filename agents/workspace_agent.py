@@ -4,6 +4,7 @@ from agno.models.anthropic import Claude
 from agno.models.google import Gemini
 from agno.models.groq import Groq
 from agno.models.openrouter import OpenRouter
+from agno.models.perplexity import Perplexity
 from agno.models.xai import xAI
 from agno.db.sqlite import SqliteDb
 from agno.knowledge.knowledge import Knowledge
@@ -205,6 +206,7 @@ DEFAULT_MODELS = {
     "groq": "llama-3.3-70b-versatile",
     "grok": "grok-3",
     "openrouter": "openai/gpt-4o-mini",
+    "perplexity": "sonar-pro",
 }
 
 
@@ -228,6 +230,8 @@ def get_model(provider: str, api_key: str, model_id: Optional[str] = None):
         return xAI(id=model_id, api_key=api_key)
     elif provider == "openrouter":
         return OpenRouter(id=model_id, api_key=api_key)
+    elif provider == "perplexity":
+        return Perplexity(id=model_id, api_key=api_key)
     else:
         # Fallback to OpenAI
         print(f"Warning: Unknown provider '{provider}', falling back to OpenAI")
